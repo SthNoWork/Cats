@@ -1,12 +1,12 @@
 // ============================================================================
-// Shop - Product Catalog Browser (GitHub Pages ready!)
-// Read-only product display with search, category filtering, and product modal
+// Cats Gallery - Media Browser
+// Read-only cats display with search, category filtering, and media modal
 // ============================================================================
 
 import Database from './connection/database.js';
 
-// Initialize database connection
-const db = new Database('products');
+// Initialize database connection (use `cats` table)
+const db = new Database('cats');
 
 // ─── State Management ────────────────────────────────────────────────────────
 let allProducts = [];
@@ -35,6 +35,8 @@ document.addEventListener('DOMContentLoaded', async () => {
     setupSearchListener();
     setupKeyboardListener();
     setupSwipeToClose();
+    // this project is a gallery — hide shop-specific promotion UI if present
+    try { if (promotionSection) promotionSection.style.display = 'none'; } catch (e) {}
 });
 
 // ─── Swipe-to-close on touch devices ─────────────────────────────────────────
@@ -86,37 +88,9 @@ function getProductMedia(product) {
 }
 
 // ─── Helper: Format price HTML ───────────────────────────────────────────────
-function formatPriceHtml(product, isModal = false) {
-    if (!product.price) return '';
-    
-    const isOnSale = hasActivePromotion(product);
-    const discountedPrice = getDiscountedPrice(product);
-    const price = parseFloat(product.price).toFixed(2);
-    
-    if (isOnSale && discountedPrice !== null) {
-        const salePrice = discountedPrice.toFixed(2);
-        if (isModal) {
-            const endDate = new Date(product.promotion_end).toLocaleDateString();
-            return `
-                <div class="modal-price-container">
-                    <span class="modal-price-original">$${price}</span>
-                    <span class="modal-price-sale">$${salePrice}</span>
-                    <span class="modal-discount-badge">-${product.discount_percent}% OFF</span>
-                </div>
-                <p class="promo-ends">Sale ends: ${endDate}</p>
-            `;
-        }
-        return `
-            <div class="price-container">
-                <span class="price-original">$${price}</span>
-                <span class="price-sale">$${salePrice}</span>
-            </div>
-        `;
-    }
-    
-    return isModal 
-        ? `<p class="modal-price">$${price}</p>`
-        : `<p class="price">$${price}</p>`;
+function formatPriceHtml() {
+    // Pricing UI removed for the cats gallery
+    return '';
 }
 
 // ─── Video Autoplay Observer ─────────────────────────────────────────────────
@@ -222,8 +196,7 @@ async function loadProducts() {
     try {
         allProducts = await db.selectAll();
         
-        // Render all sections
-        renderPromotionProducts();
+        // Render all sections (promotion section not used for gallery)
         renderRecentProducts();
         renderPopularProducts();
         renderProducts(allProducts);
@@ -381,33 +354,21 @@ function renderProductCard(product, compact = false, showPromo = false) {
     // Check if first item is video (Cloudinary URLs contain /video/ for videos)
     const isVideo = mainImage.includes('/video/') || mainImage.includes('.mp4') || mainImage.includes('.webm');
     
-    // Price with discount support
-    const isOnSale = hasActivePromotion(product);
-    const discountedPrice = getDiscountedPrice(product);
-    
-    let priceHtml = '';
-    if (product.price) {
-        if (isOnSale && discountedPrice !== null) {
-            priceHtml = `
-                <div class="price-container">
-                    <span class="price-original">$${parseFloat(product.price).toFixed(2)}</span>
-                    <span class="price-sale">$${discountedPrice.toFixed(2)}</span>
-                </div>
-            `;
-        } else {
-            priceHtml = `<p class="price">$${parseFloat(product.price).toFixed(2)}</p>`;
-        }
-    }
-    
+    // No pricing or promotion fields needed for the cat gallery
+    const priceHtml = '';
     const mediaCount = images.length > 1 ? `<span class="image-count-badge">${images.length}</span>` : '';
-    const saleBadge = isOnSale ? `<span class="sale-badge">-${product.discount_percent}%</span>` : '';
+    const saleBadge = '';
     
     const mediaElement = isVideo 
         ? `<video src="${escapeHtml(mainImage)}" muted loop playsinline preload="metadata"></video>`
         : `<img src="${escapeHtml(mainImage)}" alt="${escapeHtml(product.title)}" onerror="this.src='https://via.placeholder.com/400x400?text=No+Image'">`;
-    
+    const categoriesHtml = product.categories && Array.isArray(product.categories)
+        ? `<div class="card-categories">${product.categories.map(c => `<span class="mini-tag">${escapeHtml(c)}</span>`).join(' ')}</div>`
+        : '';
+    const addedAt = product.created_at ? `<div class="added-at">Added: ${new Date(product.created_at).toLocaleDateString()}</div>` : '';
+
     return `
-        <div class="product-card ${compact ? 'compact' : ''} ${isOnSale ? 'on-sale' : ''}" onclick="openProductModal('${product.id}')" data-id="${product.id}">
+        <div class="product-card ${compact ? 'compact' : ''}" onclick="openProductModal('${product.id}')" data-id="${product.id}">
             <div class="product-image">
                 ${mediaElement}
                 ${mediaCount}
@@ -415,7 +376,8 @@ function renderProductCard(product, compact = false, showPromo = false) {
             </div>
             <div class="product-info">
                 <h3 class="product-title">${escapeHtml(product.title)}</h3>
-                ${priceHtml}
+                ${categoriesHtml}
+                ${addedAt}
             </div>
         </div>
     `;
@@ -423,7 +385,7 @@ function renderProductCard(product, compact = false, showPromo = false) {
 
 // ─── Render Products Grid ────────────────────────────────────────────────────
 function renderProducts(products) {
-    productCount.textContent = `${products.length} product${products.length !== 1 ? 's' : ''}`;
+    productCount.textContent = `${products.length} cat${products.length !== 1 ? 's' : ''}`;
     
     if (products.length === 0) {
         productsGrid.innerHTML = '<p class="no-data">No products found</p>';
@@ -452,6 +414,7 @@ window.openProductModal = function(productId) {
     
     const adminNotes = product.admin_notes 
         ? `<div class="modal-notes"><strong>Note:</strong> ${escapeHtml(product.admin_notes)}</div>` : '';
+    const addedAtInfo = product.created_at ? `<div class="modal-added">Added: ${new Date(product.created_at).toLocaleDateString()}</div>` : '';
     
     // Main media display
     const mainMediaHtml = isVideo 
@@ -481,6 +444,7 @@ window.openProductModal = function(productId) {
             </div>
             <div class="modal-info-section">
                 <h2 class="modal-title">${escapeHtml(product.title)}</h2>
+                ${addedAtInfo}
                 ${formatPriceHtml(product, true)}
                 ${description}
                 <div class="modal-categories">${categories}</div>
