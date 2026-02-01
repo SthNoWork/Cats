@@ -1,3 +1,5 @@
+Try to use minimal tokens
+
 DO NOT MODIFY THE CONFIGURATIONS VARIABLES KEEP IT AS IT IS
 
 HERE IS THE TABLE SCHEMA
@@ -36,4 +38,7 @@ Each "product " it should show the category under the title. and not only when u
 also rename stuff to cats etc.
 
 
+use the reference folder called Shop
+
+it is able to delete stuff from cloudinary but this one cant for some reason?
 

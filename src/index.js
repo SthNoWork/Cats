@@ -189,7 +189,7 @@ function setupCategorySearchListener() {
 
 // ─── Load Products ───────────────────────────────────────────────────────────
 async function loadProducts() {
-    productsGrid.innerHTML = '<p class="loading">Loading products...</p>';
+    productsGrid.innerHTML = '<p class="loading">Loading cats...</p>';
     recentProducts.innerHTML = '<p class="loading">Loading...</p>';
     popularProducts.innerHTML = '<p class="loading">Loading...</p>';
     
@@ -201,7 +201,7 @@ async function loadProducts() {
         renderPopularProducts();
         renderProducts(allProducts);
     } catch (err) {
-        productsGrid.innerHTML = `<p class="error">Failed to load products: ${err.message}</p>`;
+        productsGrid.innerHTML = `<p class="error">Failed to load cats: ${err.message}</p>`;
         recentProducts.innerHTML = `<p class="error">Failed to load</p>`;
         popularProducts.innerHTML = `<p class="error">Failed to load</p>`;
     }
@@ -362,7 +362,7 @@ function renderProductCard(product, compact = false, showPromo = false) {
     const mediaElement = isVideo 
         ? `<video src="${escapeHtml(mainImage)}" muted loop playsinline preload="metadata"></video>`
         : `<img src="${escapeHtml(mainImage)}" alt="${escapeHtml(product.title)}" onerror="this.src='https://via.placeholder.com/400x400?text=No+Image'">`;
-    const categoriesHtml = product.categories && Array.isArray(product.categories)
+    const categoriesHtml = product.categories && Array.isArray(product.categories) && product.categories.length > 0
         ? `<div class="card-categories">${product.categories.map(c => `<span class="mini-tag">${escapeHtml(c)}</span>`).join(' ')}</div>`
         : '';
     const addedAt = product.created_at ? `<div class="added-at">Added: ${new Date(product.created_at).toLocaleDateString()}</div>` : '';
@@ -388,7 +388,7 @@ function renderProducts(products) {
     productCount.textContent = `${products.length} cat${products.length !== 1 ? 's' : ''}`;
     
     if (products.length === 0) {
-        productsGrid.innerHTML = '<p class="no-data">No products found</p>';
+        productsGrid.innerHTML = '<p class="no-data">No cats found</p>';
         return;
     }
     
