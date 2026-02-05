@@ -1,17 +1,17 @@
-# 🛒 Shop Setup Guide
+# 🐱 Cats Gallery Setup Guide
 
 ## Overview
 
-This shop application uses:
+This cats gallery application uses:
 - **Supabase** - PostgreSQL database with Row Level Security (RLS)
 - **Cloudinary** - Image/video hosting and optimization
-- **GitHub Pages** (or similar) - Host the public shop frontend
+- **GitHub Pages** (or similar) - Host the public gallery frontend
 
 ## Security Architecture
 
 | Component | Key Type | Access Level |
 |-----------|----------|--------------|
-| Public Shop (`index.html`) | `anon` key | SELECT only (read products) |
+| Public Gallery (`index.html`) | `anon` key | SELECT only (read cats) |
 | Admin Panel (`admin/admin.html`) | `service_role` key | FULL access (CRUD) |
 
 The admin panel should **NEVER** be deployed publicly - run it locally only!
@@ -32,18 +32,18 @@ The admin panel should **NEVER** be deployed publicly - run it locally only!
 
 1. In your Supabase Dashboard, go to **SQL Editor** (left sidebar)
 2. Click **+ New Query**
-3. Copy the entire contents of `supabase_schema.sql` from this repo
+3. Copy the entire contents of `database_setup.sql` from this repo
 4. Paste it into the SQL Editor
 5. Click **Run** (or press Ctrl/Cmd + Enter)
 6. You should see "Success. No rows returned" - this is normal!
 
 ### Step 3: Verify RLS Policies
 
-1. Go to **Table Editor** > **products**
+1. Go to **Table Editor** > **cats**
 2. Click the **shield icon** (RLS) or go to **Authentication** > **Policies**
 3. You should see these policies:
-   - ✅ `Allow public read access to products` (SELECT for anon)
-   - ✅ `Allow service role full access` (ALL for service_role)
+   - ✅ `Allow public read access` (SELECT for anon)
+   - ✅ `Allow authenticated insert/update/delete`
 
 ### Step 4: Get Your API Keys
 
@@ -67,16 +67,16 @@ service_role key:   eyJhbGciOiJIUzI1NiI... (KEEP SECRET!)
 3. Create an **Upload Preset**:
    - Go to **Settings** > **Upload**
    - Scroll to **Upload presets** > **Add upload preset**
-   - Name it `products`
+   - Name it `Medias`
    - Set **Signing Mode** to `Unsigned`
    - Configure transformations (optional):
-     - Width: 400, Height: 400
-     - Format: WebP (for images)
+     - Width: 1920, Height: 1080 (for images/videos)
+     - Format: auto
    - Save
 
 ### Step 6: Configure the Application
 
-#### For the Public Shop (`src/connection/database.js`):
+#### For the Public Gallery (`src/connection/database.js`):
 ```javascript
 const SUPABASE_URL = 'https://YOUR_PROJECT_ID.supabase.co';
 const SUPABASE_ANON_KEY = 'your-anon-key-here';
@@ -90,16 +90,16 @@ const SUPABASE_SERVICE_KEY = 'your-service-role-key-here';
 const CLOUDINARY_CLOUD_NAME = 'your-cloud-name';
 const CLOUDINARY_API_KEY = 'your-api-key';
 const CLOUDINARY_API_SECRET = 'your-api-secret';
-const CLOUDINARY_UPLOAD_PRESET = 'products';
+const CLOUDINARY_UPLOAD_PRESET = 'Medias';
 ```
 
-### Step 7: Deploy the Public Shop
+### Step 7: Deploy the Public Gallery
 
 **Option A: GitHub Pages**
 1. Push `index.html`, `src/`, and `README.md` to a GitHub repo
 2. Go to repo **Settings** > **Pages**
 3. Set Source to `main` branch, folder to `/ (root)`
-4. Your shop will be at `https://username.github.io/repo-name`
+4. Your gallery will be at `https://username.github.io/repo-name`
 
 **Option B: Vercel/Netlify**
 1. Connect your repo
@@ -118,11 +118,11 @@ const CLOUDINARY_UPLOAD_PRESET = 'products';
 ## 🔒 Security Notes
 
 ### What the anon key can do:
-- ✅ Read all products (SELECT)
-- ❌ Cannot insert new products
-- ❌ Cannot update products
-- ❌ Cannot delete products
-- ❌ Cannot see `admin_notes` (if using the `public_products` view)
+- ✅ Read all cats (SELECT)
+- ❌ Cannot insert new cats
+- ❌ Cannot update cats
+- ❌ Cannot delete cats
+- ❌ Cannot see `admin_notes`
 
 ### What the service_role key can do:
 - ✅ Full CRUD access (Create, Read, Update, Delete)
@@ -139,82 +139,73 @@ const CLOUDINARY_UPLOAD_PRESET = 'products';
 
 ## 🗄️ Database Schema Reference
 
-### Products Table
+### Cats Table
 
 | Column | Type | Description |
 |--------|------|-------------|
 | `id` | UUID | Primary key (auto-generated) |
-| `title` | TEXT | Product name (required) |
-| `description` | TEXT | Customer-facing description |
-| `price` | DECIMAL | Product price |
-| `image_urls` | TEXT[] | Array of Cloudinary URLs |
-| `categories` | TEXT[] | Array of category names |
+| `title` | TEXT | Cat title |
+| `description` | TEXT | Cat description |
+| `image_data` | JSONB | Array of `{url, type}` |
+| `categories` | TEXT[] | Array of category names (stored directly) |
 | `is_featured` | BOOLEAN | Show in featured section |
 | `admin_notes` | TEXT | Internal notes (hidden from public) |
-| `discount_percent` | INTEGER | Promotion discount (0-100) |
-| `promotion_start` | TIMESTAMPTZ | Promo start date |
-| `promotion_end` | TIMESTAMPTZ | Promo end date |
+| `upload_mode` | TEXT | 'batch' or 'individual' |
 | `created_at` | TIMESTAMPTZ | Auto-set on create |
 | `updated_at` | TIMESTAMPTZ | Auto-updated on changes |
+
+**Note:** Categories are stored directly in the `cats` table as a TEXT array. There is no separate categories table - new categories are automatically available when you add them to any cat entry.
+
+### image_data JSONB Structure
+
+```json
+[
+    {
+        "url": "https://res.cloudinary.com/...",
+        "type": "image"
+    }
+]
+```
+
+---
+
+## 📸 Upload Modes
+
+### Batch Mode (🖼️)
+- Multiple images share ONE title and description
+- Best for: photo albums, cat photo collections
+- All images are stored in one database entry
+
+### Individual Mode (📸)
+- Each image becomes its OWN separate database entry
+- Best for: daily cat photos, unique moments
+- Each image gets its own title, description, and categories
 
 ---
 
 ## 🔧 Troubleshooting
 
-### "Failed to fetch products" error
+### "Failed to fetch cats" error
 - Check if your Supabase URL is correct
 - Verify the anon key is properly set
 - Check browser console for CORS errors
 
-### Products not showing in shop
+### Cats not showing in gallery
 - Verify RLS policy exists for `anon` SELECT
 - Test the query in Supabase SQL Editor
-- Check if products exist in the table
+- Check if cats exist in the table
 
-### Admin can't add products
+### Admin can't add cats
 - Verify you're using the `service_role` key (not anon)
 - Check if the key is correctly formatted
 - Look for errors in browser console
 
 ### Images not uploading
 - Verify Cloudinary credentials
-- Check if upload preset exists and is `unsigned`
-- Ensure file size is under limits
+- Check that upload preset is set to "Unsigned"
+- Verify the preset name matches your config (`Medias`)
 
----
-
-## 📁 File Structure
-
-```
-Shop/
-├── index.html          # Public shop frontend (DEPLOY THIS)
-├── README.md           # Project info
-├── supabase_schema.sql # Database setup script
-├── SETUP.md            # This file
-├── src/
-│   ├── index.js        # Shop JavaScript
-│   ├── css/
-│   │   └── index.css   # Shop styles
-│   └── connection/
-│       └── database.js # Supabase connection (anon key)
-└── admin/              # ⚠️ LOCAL ONLY - DO NOT DEPLOY
-    ├── admin.html      # Admin panel UI
-    ├── admin.js        # Admin logic (service_role key)
-    └── admin.css       # Admin styles
-```
-
----
-
-## ✅ Checklist
-
-- [ ] Created Supabase project
-- [ ] Ran `supabase_schema.sql` in SQL Editor
-- [ ] Verified RLS policies are active
-- [ ] Copied anon key to `database.js`
-- [ ] Copied service_role key to `admin.js`
-- [ ] Set up Cloudinary account
-- [ ] Created unsigned upload preset
-- [ ] Added Cloudinary credentials to `admin.js`
-- [ ] Deployed public shop (without admin folder)
-- [ ] Admin panel works locally
-- [ ] Added `admin/` to `.gitignore`
+### Images not deleting from Cloudinary
+- Verify API Secret is correct
+- Check browser console for signature errors
+- Ensure the public_id extraction is working

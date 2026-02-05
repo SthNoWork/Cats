@@ -1,44 +1,39 @@
-Try to use minimal tokens
+try to use less tokens and smartliy
 
-DO NOT MODIFY THE CONFIGURATIONS VARIABLES KEEP IT AS IT IS
+Note:
+Currently the functionality all works ill note the important one down:
+1. Uploading picture will only upload after the admin clicks to add it wont upload to cloudinary if user isnt done
+2. when editing to remove picture or just removing product currently it is able to do it fine deleting it from cloudinary. (most the time ai always break this so try not to break it)
 
-HERE IS THE TABLE SCHEMA
-create table public.cats (
-  id uuid not null default gen_random_uuid (),
-  title text not null,
-  image_urls text[] not null,
-  description text null,
-  admin_notes text null,
-  categories text[] null,
-  is_featured boolean null default false,
-  created_at timestamp with time zone null default now(),
-  updated_at timestamp with time zone null default now(),
-  constraint cats_pkey primary key (id)
-) TABLESPACE pg_default;
+TODO: 
+Remove annything related to products and change it to cats since before its a shop
+Add feature:
+ADMIN:
+add a button to use the current mode (how it works rn call it batch mode) everyone has shared descriptions and title
 
-create index IF not exists idx_cats_categories on public.cats using gin (categories) TABLESPACE pg_default;
+add a button to do (new) indivitual mode. Each picture can have different title description category etc everything that would fit indivitual pciture like on fb post yes?
+so in batch mode admin can seelct a bunch at a time
+in batch mode it does how it works rn.
 
-create index IF not exists idx_cats_created_at on public.cats using btree (created_at desc) TABLESPACE pg_default;
+in the indivitual mode it will go through each picture one at a time and add 
 
-create index IF not exists idx_cats_featured on public.cats using btree (is_featured) TABLESPACE pg_default
-where
-  (is_featured = true);
+Public view:
+Again remove stuff releateed to products to cats related yes?
+In the all cats section add a button to view by batches or indivitual
 
-TODO:
-In admin.js
+BEWARE: it does not mean only show the mode that are batch and the modes that are indivitual so heres how it works
 
-Upadting the product using and removing photoes, it is unable to delete the cloudinary photoes only from the supabase.
+Batch mode sows how it works currently
++ indivitual ones ofc 
 
-Also now instead of creating 
+indivitual mode 
 
-In index related
+The batch mode will be displayed as
 
-Each "product " it should show the category under the title. and not only when u click on them. also add a (added at) as an info customers can see
- 
-also rename stuff to cats etc.
+Mainonefirst.. nextpho. next photo. next photo. (only one thumbnail and description on the first main one. the rest will just be empty)
++ indivitual ones
 
+make sure u can filter them by category
 
-use the reference folder called Shop
-
-it is able to delete stuff from cloudinary but this one cant for some reason?
-
+and ofc u can do styling animation or style the website however u want 
+goodluck! rememebr its cat themed

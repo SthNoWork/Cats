@@ -3,13 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Cats Gallery</title>
+    <title>🐱 Cats Gallery</title>
     <link rel="stylesheet" href="src/css/index.css">
 </head>
 <body>
     <header>
-        <h1>� Cats Gallery</h1>
-        <p class="subtitle">Browse our collection</p>
+        <h1>🐱 Cats Gallery</h1>
+        <p class="subtitle">Purrfect collection of adorable cats</p>
     </header>
 
     <!-- Search & Filter Section -->
@@ -18,13 +18,28 @@
             <input 
                 type="text" 
                 id="searchInput" 
-                placeholder="Search cats by name..." 
+                placeholder="🔍 Search cats by name..." 
                 class="search-input"
             >
         </div>
 
+        <!-- View Mode Toggle -->
+        <div class="view-mode-container">
+            <span class="view-mode-label">View Mode:</span>
+            <div class="view-mode-toggle">
+                <label class="view-mode-option">
+                    <input type="radio" name="viewMode" value="batch" checked onchange="switchViewMode()">
+                    <span class="view-mode-btn">🖼️ Gallery</span>
+                </label>
+                <label class="view-mode-option">
+                    <input type="radio" name="viewMode" value="individual" onchange="switchViewMode()">
+                    <span class="view-mode-btn">📸 Individual</span>
+                </label>
+            </div>
+        </div>
+
         <div class="filter-container">
-            <h3>Filter by Categories:</h3>
+            <h3>🏷️ Filter by Categories:</h3>
             <div class="category-search-container">
                 <input 
                     type="text" 
@@ -39,48 +54,39 @@
         </div>
     </div>
 
-    <!-- Promotion Section (hidden if no active promotions) -->
-    <div id="promotionSection" class="products-section promotion-section" style="display: none;">
-        <div class="products-header">
-            <h2>🔥 On Sale</h2>
-        </div>
-        <div id="promotionProducts" class="products-grid horizontal-scroll">
-        </div>
-    </div>
-
-    <!-- Recently Added Section (hidden if none added within a week) -->
-    <div id="recentSection" class="products-section" style="display: none;">
-        <div class="products-header">
+    <!-- Recently Added Section -->
+    <div id="recentSection" class="cats-section" style="display: none;">
+        <div class="cats-header">
             <h2>🆕 Recently Added</h2>
         </div>
-        <div id="recentProducts" class="products-grid horizontal-scroll">
+        <div id="recentCats" class="cats-grid horizontal-scroll">
             <p class="loading">Loading...</p>
         </div>
     </div>
 
-    <!-- Popular Products Section (hidden if none featured) -->
-    <div id="popularSection" class="products-section" style="display: none;">
-        <div class="products-header">
-            <h2>⭐ Popular</h2>
+    <!-- Popular Cats Section -->
+    <div id="popularSection" class="cats-section" style="display: none;">
+        <div class="cats-header">
+            <h2>⭐ Popular Cats</h2>
         </div>
-        <div id="popularProducts" class="products-grid horizontal-scroll">
+        <div id="popularCats" class="cats-grid horizontal-scroll">
             <p class="loading">Loading...</p>
         </div>
     </div>
 
     <!-- All Cats Section -->
-    <div class="products-section">
-        <div class="products-header">
-            <h2>All Cats</h2>
-            <span id="productCount" class="product-count"></span>
+    <div class="cats-section">
+        <div class="cats-header">
+            <h2>🐾 All Cats</h2>
+            <span id="catCount" class="cat-count"></span>
         </div>
-        <div id="productsGrid" class="products-grid">
+        <div id="catsGrid" class="cats-grid">
             <p class="loading">Loading cats...</p>
         </div>
     </div>
 
-    <!-- Product Detail Modal -->
-    <div id="productModal" class="modal" onclick="closeModal(event)">
+    <!-- Cat Detail Modal -->
+    <div id="catModal" class="modal" onclick="closeModal(event)">
         <div class="modal-content" onclick="event.stopPropagation()">
             <div id="modalBody"></div>
         </div>

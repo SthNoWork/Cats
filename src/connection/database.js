@@ -1,6 +1,6 @@
 // supabase.js
-// Read-only Supabase database class for public product catalog
-// Uses anon key with RLS - only SELECT access to products (admin_notes hidden)
+// Read-only Supabase database class for public cats catalog
+// Uses anon key with RLS - only SELECT access to cats (admin_notes hidden)
 
 // ─── Configuration ───────────────────────────────────────────────────────────
 const SUPABASE_URL = 'https://xvlilgsawbqpedmrbdkv.supabase.co';
@@ -71,12 +71,12 @@ export default class Database {
     }
 
     /**
-     * Get all unique categories from the products table
+     * Get all unique categories from the cats table
      * Dynamically extracts categories from the categories array column
      * @returns {Promise<Array<string>>} Array of unique category names
      */
     async getUniqueCategories() {
-        // Use PostgREST to get all products with categories
+        // Use PostgREST to get all cats with categories
         const response = await fetch(`${this.baseUrl}/${this.tableName}?select=categories`, {
             method: 'GET',
             headers: this.headers
@@ -87,20 +87,20 @@ export default class Database {
             throw new Error(error.message || 'Failed to fetch categories');
         }
         
-        const products = await response.json();
+        const cats = await response.json();
         
         // Extract and flatten all categories, then get unique values
-        const allCategories = products
-            .filter(p => p.categories && Array.isArray(p.categories))
-            .flatMap(p => p.categories);
+        const allCategories = cats
+            .filter(c => c.categories && Array.isArray(c.categories))
+            .flatMap(c => c.categories);
         
         return [...new Set(allCategories)].sort();
     }
 
     /**
-     * Filter products by category
+     * Filter cats by category
      * @param {string} category - Category name to filter by
-     * @returns {Promise<Array>} Array of products containing this category
+     * @returns {Promise<Array>} Array of cats containing this category
      */
     async selectByCategory(category) {
         // Use PostgreSQL array contains operator @> 
@@ -114,16 +114,16 @@ export default class Database {
         
         if (!response.ok) {
             const error = await response.json();
-            throw new Error(error.message || 'Failed to fetch products by category');
+            throw new Error(error.message || 'Failed to fetch cats by category');
         }
         
         return await response.json();
     }
 
     /**
-     * Filter products by multiple categories (AND logic)
+     * Filter cats by multiple categories (AND logic)
      * @param {Array<string>} categories - Array of category names
-     * @returns {Promise<Array>} Array of products containing ALL these categories
+     * @returns {Promise<Array>} Array of cats containing ALL these categories
      */
     async selectByCategories(categories) {
         if (!categories || categories.length === 0) {
@@ -142,7 +142,7 @@ export default class Database {
         
         if (!response.ok) {
             const error = await response.json();
-            throw new Error(error.message || 'Failed to fetch products by categories');
+            throw new Error(error.message || 'Failed to fetch cats by categories');
         }
         
         return await response.json();
