@@ -3,7 +3,7 @@
 # ============================================================================
 
 # ⚠️ CRITICAL: Admin folder contains API secrets - never commit!
-admin
+Cats-admin
 Shop
 # SQL files (may contain sensitive data)
 *.sql

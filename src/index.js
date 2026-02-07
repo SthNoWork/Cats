@@ -34,6 +34,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     setupSearchListener();
     setupKeyboardListener();
     setupSwipeToClose();
+    setupBackButtonHandler();
 });
 
 // ─── View Mode Switching ─────────────────────────────────────────────────────
@@ -66,6 +67,17 @@ function setupSwipeToClose() {
             closeModal();
         }
     }, { passive: true });
+}
+
+// ─── Back Button Handler for Android/Samsung devices ────────────────────────
+function setupBackButtonHandler() {
+    // Listen for browser back button (hardware back on Android)
+    window.addEventListener('popstate', (e) => {
+        if (catModal.classList.contains('active')) {
+            e.preventDefault();
+            closeModal();
+        }
+    });
 }
 
 // ─── Helper: Check if URL is video ───────────────────────────────────────────
@@ -499,6 +511,9 @@ window.openCatModal = function(catId, startIndex = 0) {
     catModal.classList.add('active');
     document.body.style.overflow = 'hidden';
     
+    // Push history state for back button support (Android/Samsung)
+    history.pushState({ modalOpen: true }, '', window.location.href);
+    
     const modalVideo = document.getElementById('modalMainMedia');
     if (modalVideo && modalVideo.tagName === 'VIDEO') {
         modalVideo.muted = false;
@@ -554,6 +569,10 @@ window.changeModalMedia = function(src, thumb, isVideo, catId, imgIndex) {
 // ─── Close Modal ─────────────────────────────────────────────────────────────
 window.closeModal = function(event) {
     if (event && event.target !== catModal) return;
+    
+    // Only call if modal is actually open
+    if (!catModal.classList.contains('active')) return;
+    
     const modalVideo = document.getElementById('modalMainMedia');
     if (modalVideo && modalVideo.tagName === 'VIDEO') {
         modalVideo.muted = true;
@@ -561,6 +580,11 @@ window.closeModal = function(event) {
     }
     catModal.classList.remove('active');
     document.body.style.overflow = '';
+    
+    // Clean up history state if it was pushed
+    if (history.state?.modalOpen) {
+        history.back();
+    }
 };
 
 // ─── Utility Functions ───────────────────────────────────────────────────────
